@@ -1,3 +1,4 @@
+import re
 import socket
 import subprocess
 
@@ -18,6 +19,8 @@ def serv():
                 closing_message = "Closing connection."
                 sock.send(closing_message.encode('utf-8'))
                 break
+            elif client_message == 'cd':
+                execute_command(client_message, sock)
             else:
                 execute_command(client_message, sock)
 
@@ -28,7 +31,7 @@ def execute_command(command, sock):
     # would fail and would return 'cat file' file or directory not found. capture output to have both STDOUT and STDERR
     # captured.
     result = subprocess.run(command, shell=True, capture_output=True)
-    # Send stderr is return code not 0, otherwise send stdout back to the client.
+    # Send stderr if return code not 0, otherwise send stdout back to the client.
     if result.returncode != 0:
         sock.send(result.stderr)
     else:
